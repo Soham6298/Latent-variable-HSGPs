@@ -16,7 +16,7 @@ library(data.table)
 source('hsgpfitfns.R')
 
 # VIGP model output
-gplvmpyout <- read.csv('gplvmout/GPLVMpyOut_se.csv')
+gplvmpyout <- read.csv('vigp sim results/GPLVMpyOut_m52.csv')
 summary(gplvmpyout)
 colnames(gplvmpyout) <- c('n', 'd', 'sim_id','sample_id', 'true_values', 'mean', 'sd')
 gplvmpyout$d <- as.factor(gplvmpyout$d)
@@ -47,7 +47,7 @@ pyro_out$data_id = paste0(pyro_out$sim_id, '_',
 pyro_out <- pyro_out[order(pyro_out$sim_id),]
 
 # HSGP and exact GP model output
-compare_table <- readRDS('gprout/hsgp_simout_se.rds')
+compare_table <- readRDS('hsgp and exact gp sim results/hsgp_simout_se.rds')
 compare_table$sim_id <- as.factor(compare_table$sim_id)
 compare_table$n <- as.factor(compare_table$n)
 compare_table$m <- as.factor(compare_table$m)
@@ -63,7 +63,8 @@ pyro_out$d <- as.factor(pyro_out$d)
 pyro_out$data_id <- as.factor(pyro_out$data_id)
 compare_table <- rbind(compare_table, pyro_out)
 compare_x <- subset(compare_table, class == 'x')
-compare_x$m <- factor(compare_x$m, levels = c('exact', '22', '26', '30', 'VIGP'))
+# Change factor labels according to different simulation studies
+compare_x$m <- factor(compare_x$m, levels = c('exact', '22', '26', '30', 'pyroVI'))
 
 # ECDF for exact GPs
 sbctestrank_exact <- compare_table[which(compare_table$n == 20 & 
@@ -83,12 +84,12 @@ testrank$sim_id <- as.factor(testrank$sim_id)
 
 # Create variable names list
 x_names <- sprintf('x[%s]', seq(1:20))
-plot_label <- paste0('Exact')
+plot_label <- paste0('Exact GP')
 list_combine <- list(x_names)  
 names(list_combine)[1] <- plot_label # Properly named list
 # Plot for exact GP
 exact_ecdf <- plot_ecdf_diff(testrank, max_rank=1000, combine_variables = list_combine) +
-  theme_bw(base_size = 20, base_family = 'Times') + 
+  theme_bw(base_size = 25, base_family = 'Times') + 
   scale_linewidth(range = 6)
 
 # ECDF for HSGPs
@@ -114,14 +115,14 @@ list_combine <- list(x_names)
 names(list_combine)[1] <- plot_label# Properly named list
 # Plot for HSGPs
 hsgp_ecdf <- plot_ecdf_diff(testrank, max_rank=1000, combine_variables = list_combine) +
-  theme_bw(base_size = 20, base_family = 'Times') + 
+  theme_bw(base_size = 25, base_family = 'Times') + 
   scale_linewidth(range = 6)
 
 # ECDF for VIGPs
 sbctestrank_pyro <- compare_table[which(compare_table$n == 20 & 
                                            compare_table$d == 20 & 
                                            compare_table$class == 'x' &
-                                           compare_table$m == 'VIGP' &
+                                           compare_table$m == 'pyroVI' &
                                            compare_table$model_name == 'pyro'), ]
 testrank <- sbctestrank_pyro[, c(1, 6, 14)]
 
@@ -135,12 +136,12 @@ testrank$sim_id <- as.factor(testrank$sim_id)
 
 # Create variable names list
 x_names <- sprintf('x[%s]', seq(1:20))
-plot_label <- paste0('PyroVI')
+plot_label <- paste0('VIGP')
 list_combine <- list(x_names)  
 names(list_combine)[1] <- plot_label# Properly named list
 # Plot for VIGPs
 pyro_ecdf <- plot_ecdf_diff(testrank, max_rank=1000, combine_variables = list_combine) +
-  theme_bw(base_size = 20, base_family = 'Times') + 
+  theme_bw(base_size = 25, base_family = 'Times') + 
   scale_linewidth(range = 6)
 
 # Combine ECDF plots from all models

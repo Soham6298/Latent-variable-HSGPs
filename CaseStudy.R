@@ -27,6 +27,7 @@ t <- cellcycledata$cell_cycle_hrs
 p <- cellcycledata$cell_cycle_phase
 # prepare final data for pyro-VI fitting
 finaldata <- data.frame(y, t, p)
+# Only to import to VIGPs (in pyro)
 write.csv(finaldata, 'case study data/case_study_hsgp_data.csv')
 # set for prior measurement SD for latent x
 s_x <- 0.03
@@ -92,7 +93,7 @@ hsgp_se_summary$obs_t <- t
 hsgp_se_summary$phases <- p
 hsgp_se_summary$label <- 'HSGP vs Cell hours'
 hsgp_se_plot <- ggplot(hsgp_se_summary, aes(x = obs_t, y = mean - obs_t, colour = phases)) + 
-  theme_bw(base_size = 25, base_family = 'Times') +
+  theme_bw(base_size = 35, base_family = 'Times') +
   geom_point(size = 2.5) +
   geom_hline(yintercept = 0, colour = "#0072B2", linetype = 'dashed', linewidth = 1.5) +
   ylim(c(-0.35, 0.35)) +
@@ -100,25 +101,25 @@ hsgp_se_plot <- ggplot(hsgp_se_summary, aes(x = obs_t, y = mean - obs_t, colour 
   scale_colour_manual(values = c("#CC79A7", "#E69F00", "#009E73")) +
   labs(x = 'Cell hours', y = 'Difference', colour = 'Phases')
 
-# pyro-VI vs cellhours figure
+# VIGP vs cellhours figure
 pyro_casestudy <- read.csv('gplvmout/GPLVMpyOut_se_casestudy.csv') ## output from fitted pyro-VI
 pyro_casestudy$phases <- p
-pyro_casestudy$label <- 'PyroVI vs Cell hours'
+pyro_casestudy$label <- 'VIGP vs Cell hours'
 pyro_se_plot <- ggplot(pyro_casestudy, aes(x = t, y = X_mean - t, colour = phases)) + 
-  theme_bw(base_size = 25, base_family = 'Times') +
+  theme_bw(base_size = 35, base_family = 'Times') +
   geom_point(size = 2.5) +
   geom_hline(yintercept = 0, colour = "#0072B2", linetype = 'dashed', linewidth = 1.5) +
   ylim(c(-0.35, 0.35)) +
   facet_wrap(~label) +
   labs(x = 'Cell hours', y = 'Difference', colour = 'Phases') +
   scale_colour_manual(values = c("#CC79A7", "#E69F00", "#009E73")) 
-# pyro-VI vs HSGP figure
+# VIGP vs HSGP figure
 pyro_hsgp_diff <- data.frame(obs_t = hsgp_se_summary$obs_t, 
                              phases = hsgp_se_summary$phases, 
                              hsgp_pyro_diff = hsgp_se_summary$mean - pyro_casestudy$X_mean, 
-                             label = 'HSGP vs PyroVI')
+                             label = 'HSGP vs VIGP')
 pyro_hsgp_se_plot <- ggplot(pyro_hsgp_diff, aes(x = obs_t, y = hsgp_pyro_diff, colour = phases)) + 
-  theme_bw(base_size = 25, base_family = 'Times') +
+  theme_bw(base_size = 35, base_family = 'Times') +
   geom_point(size = 2.5) +
   geom_hline(yintercept = 0, colour = "#0072B2", linetype = 'dashed', linewidth = 1.5) +
   ylim(c(-0.35, 0.35)) +
@@ -132,7 +133,7 @@ ggsave('hsgp_case_study_plot.pdf',
        case_study_plot,
        dpi = 300,
        width = 45,
-       height = 15,
+       height = 18,
        units = 'cm')
 
 ## Figures for GP hyperparameter estimation
@@ -152,7 +153,7 @@ hsgp_se_summary_sigma$ftitle <- 'sigma'
 
 # GP length-scale figure
 hsgp_se_rho_plot <- ggplot(hsgp_se_summary_rho, aes(x = output_dim, y = mean)) +   
-  theme_bw(base_size = 40, base_family = 'Times') +
+  theme_bw(base_size = 65, base_family = 'Times') +
   geom_point(size = 3) +
   geom_errorbar(aes(ymin = q5, ymax = q95), linewidth = 1) + 
   labs(x = '', y = '') +
@@ -162,7 +163,7 @@ hsgp_se_rho_plot <- ggplot(hsgp_se_summary_rho, aes(x = output_dim, y = mean)) +
   
 # GP marginal SD figure
 hsgp_se_alpha_plot <- ggplot(hsgp_se_summary_alpha, aes(x = output_dim, y = mean)) +   
-  theme_bw(base_size = 40, base_family = 'Times') +
+  theme_bw(base_size = 65, base_family = 'Times') +
   geom_point(size = 3, position = position_dodge(0.7)) +
   geom_errorbar(aes(ymin = q5, ymax = q95), linewidth = 1, position = position_dodge(0.7)) + 
   labs(x = '', y = '') + 
@@ -171,7 +172,7 @@ hsgp_se_alpha_plot <- ggplot(hsgp_se_summary_alpha, aes(x = output_dim, y = mean
 
 # Error SD figure
 hsgp_se_sigma_plot <- ggplot(hsgp_se_summary_sigma, aes(x = output_dim, y = mean)) +   
-  theme_bw(base_size = 40, base_family = 'Times') +
+  theme_bw(base_size = 65, base_family = 'Times') +
   geom_point(size = 3, position = position_dodge(0.7)) +
   geom_errorbar(aes(ymin = q5, ymax = q95), linewidth = 1, position = position_dodge(0.7)) + 
   labs(x = '', y = '') + 
@@ -182,14 +183,14 @@ hsgp_se_sigma_plot <- ggplot(hsgp_se_summary_sigma, aes(x = output_dim, y = mean
 # Combine al sub-figures
 hsgp_cellcycle_pars <- (hsgp_se_rho_plot + hsgp_se_alpha_plot + hsgp_se_sigma_plot) +
   plot_layout(axis_titles = 'collect', guides = 'collect') &
-  theme(axis.text = element_text(size = 40))
+  theme(axis.text = element_text(size = 50))
 hsgp_cellcycle_pars
 gt <- patchwork::patchworkGrob(hsgp_cellcycle_pars)
-g <- arrangeGrob(gt, left = textGrob("Estimate", rot = 90, gp = gpar(fontsize=40, fontfamily='Times')), 
-                  bottom = textGrob("Gene", vjust = -0.2, gp = gpar(fontsize=40, fontfamily='Times')))
+g <- arrangeGrob(gt, left = textGrob("Estimate", rot = 90, gp = gpar(fontsize=65, fontfamily='Times')), 
+                  bottom = textGrob("Gene", vjust = -0.2, gp = gpar(fontsize=65, fontfamily='Times')))
 ggsave('hsgp_case_study_pars.pdf',
        g,
        dpi = 300,
-       width = 80,
-       height = 20,
+       width = 90,
+       height = 25,
        units = 'cm')

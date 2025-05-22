@@ -16,7 +16,7 @@ library(data.table)
 source('hsgpfitfns.R')
 
 # Import results from VIGPs
-gplvmpyout <- read.csv('gplvmout/GPLVMpyOut_se_widerho.csv')
+gplvmpyout <- read.csv('vigp sim results/GPLVMpyOut_m52.csv')
 summary(gplvmpyout)
 colnames(gplvmpyout) <- c('n', 'd', 'sim_id','sample_id', 'true_values', 'mean', 'sd')
 gplvmpyout$d <- as.factor(gplvmpyout$d)
@@ -48,7 +48,7 @@ pyro_out <- pyro_out[order(pyro_out$sim_id),]
 
 
 # Import results from exact and HSGPs
-compare_table <- readRDS('gprout/hsgp_simout_se_widerho.rds')
+compare_table <- readRDS('hsgp and exact gp sim results/hsgp_simout_se.rds')
 compare_table$sim_id <- as.factor(compare_table$sim_id)
 compare_table$n <- as.factor(compare_table$n)
 compare_table$m <- as.factor(compare_table$m)
@@ -67,6 +67,7 @@ compare_rho <- subset(compare_table, class == 'rho')
 compare_alpha <- subset(compare_table, class == 'alpha')
 compare_sigma <- subset(compare_table, class == 'sigma')
 levels(compare_x$m)
+# Change factor labels according to different simulation studies
 compare_x$m <- factor(compare_x$m, levels = c('exact', '22', '26', '30', 'pyroVI'))
 compare_x_20 <- subset(compare_x, n == 20)
 compare_x_50 <- subset(compare_x, n == 50)
@@ -90,7 +91,6 @@ m_x_50_sd <- brm(formula_sd, data = compare_x_50, chains = 2, cores = 2, file_re
 m_x_200_bias <- brm(formula_bias,data = compare_x_200, chains = 2, cores = 2, file_refit = 'on_change')
 
 m_x_200_sd <- brm(formula_sd,data = compare_x_200, chains = 2, cores = 2, file_refit = 'on_change')
-
 
 ## Extract summary results as conditional eff data
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
@@ -134,14 +134,14 @@ m_sd_eff200_s <- conditional_effects(m_x_200_sd, effects = 'true_value:m',
 
 # Prepare plots
 label_outdims <- c('D = 5','D = 10','D = 20')
-label_models <- c('Exact', 'HSGP(22)','HSGP(26)','HSGP(30)','VIGP')
-
+# Check and change labels according to the number of basis functions for HSGPs
+label_models <- c('Exact GP', 'HSGP(22)','HSGP(26)','HSGP(30)','VIGP')
 # Posterior bias plots
 df_bias_eff20 <- as.data.frame(m_bias_eff20$`m`)
 levels(df_bias_eff20$cond__) <- label_outdims
 levels(df_bias_eff20$effect1__) <- label_models
 p_bias_eff20 <- ggplot(df_bias_eff20, aes(x = effect1__, y = estimate__)) +
-  theme_bw(base_size=25,
+  theme_bw(base_size=35,
            base_family = 'Times') +
   geom_point(size = 3.5 ,
              position = position_dodge(width = 0.7)) +
@@ -150,7 +150,7 @@ p_bias_eff20 <- ggplot(df_bias_eff20, aes(x = effect1__, y = estimate__)) +
                 linewidth = 1.0,
                 position = position_dodge(width = 0.7)) +
   facet_wrap(~cond__) +
-  labs(x = 'Models', y = 'Abs Bias') +
+  labs(x = 'Models', y = 'Bias') +
   guides(fill = 'none') + 
   theme(axis.ticks = element_line(linewidth = 3), 
         axis.text.x = element_text(angle = 35, vjust = 0.7, hjust = 0.6)) +
@@ -160,7 +160,7 @@ df_bias_eff50 <- as.data.frame(m_bias_eff50$`m`)
 levels(df_bias_eff50$cond__) <- label_outdims
 levels(df_bias_eff50$effect1__) <- label_models[-1]
 p_bias_eff50 <- ggplot(df_bias_eff50, aes(x = effect1__, y = estimate__)) +
-  theme_bw(base_size=25,
+  theme_bw(base_size=35,
            base_family = 'Times') +
   geom_point(size = 3.5 ,
              position = position_dodge(width = 0.7)) +
@@ -169,7 +169,7 @@ p_bias_eff50 <- ggplot(df_bias_eff50, aes(x = effect1__, y = estimate__)) +
                 linewidth = 1.0,
                 position = position_dodge(width = 0.7)) +
   facet_wrap(~cond__) +
-  labs(x = 'Models', y = 'Abs Bias') +
+  labs(x = 'Models', y = 'Bias') +
   guides(fill = 'none') + 
   theme(axis.ticks = element_line(linewidth = 3), 
         axis.text.x = element_text(angle = 35, vjust = 0.7, hjust = 0.6)) +
@@ -179,7 +179,7 @@ df_bias_eff200 <- as.data.frame(m_bias_eff200$`m`)
 levels(df_bias_eff200$cond__) <- label_outdims
 levels(df_bias_eff200$effect1__) <- label_models[-1]
 p_bias_eff200 <- ggplot(df_bias_eff200, aes(x = effect1__, y = estimate__)) +
-  theme_bw(base_size=25,
+  theme_bw(base_size=35,
            base_family = 'Times') +
   geom_point(size = 3.5 ,
              position = position_dodge(width = 0.7)) +
@@ -188,7 +188,7 @@ p_bias_eff200 <- ggplot(df_bias_eff200, aes(x = effect1__, y = estimate__)) +
                 linewidth = 1.0,
                 position = position_dodge(width = 0.7)) +
   facet_wrap(~cond__) +
-  labs(x = 'Models', y = 'Abs Bias') +
+  labs(x = 'Models', y = 'Bias') +
   guides(fill = 'none') + 
   theme(axis.ticks = element_line(linewidth = 3), 
         axis.text.x = element_text(angle = 35, vjust = 0.7, hjust = 0.6)) +
@@ -199,7 +199,7 @@ df_sd_eff20 <- as.data.frame(m_sd_eff20$`m`)
 levels(df_sd_eff20$cond__) <- label_outdims
 levels(df_sd_eff20$effect1__) <- label_models
 p_sd_eff20 <- ggplot(df_sd_eff20, aes(x = effect1__, y = estimate__)) +
-  theme_bw(base_size=25,
+  theme_bw(base_size=35,
            base_family = 'Times') +
   geom_point(size = 3.5 ,
              position = position_dodge(width = 0.7)) +
@@ -218,7 +218,7 @@ df_sd_eff50 <- as.data.frame(m_sd_eff50$`m`)
 levels(df_sd_eff50$cond__) <- label_outdims
 levels(df_sd_eff50$effect1__) <- label_models[-1]
 p_sd_eff50 <- ggplot(df_sd_eff50, aes(x = effect1__, y = estimate__)) +
-  theme_bw(base_size=25,
+  theme_bw(base_size=35,
            base_family = 'Times') +
   geom_point(size = 3.5 ,
              position = position_dodge(width = 0.7)) +
@@ -237,7 +237,7 @@ df_sd_eff200 <- as.data.frame(m_sd_eff200$`m`)
 levels(df_sd_eff200$cond__) <- label_outdims
 levels(df_sd_eff200$effect1__) <- label_models[-1]
 p_sd_eff200 <- ggplot(df_sd_eff200, aes(x = effect1__, y = estimate__)) +
-  theme_bw(base_size=25,
+  theme_bw(base_size=35,
            base_family = 'Times') +
   geom_point(size = 3.5 ,
              position = position_dodge(width = 0.7)) +
@@ -258,9 +258,10 @@ p_latentx_eff <- ((p_bias_eff20 + p_sd_eff20) /
                       (p_bias_eff200 + p_sd_eff200)) + 
                        plot_layout(axis_titles = 'collect')
 
-ggsave('se_widerho_latentx.pdf',
+ggsave('se_latentx.pdf',
        p_latentx_eff,
        dpi = 300,
        width = 60,
-       height = 40,
+       height = 45,
        units = 'cm')
+

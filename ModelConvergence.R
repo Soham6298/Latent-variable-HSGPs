@@ -14,7 +14,7 @@ library(gridExtra)
 ## Set variable names, sample points and number of trials
 # Source functions
 source('hsgpfitfns.R')
-simdata_out <- readRDS('gprout/hsgp_simout_per_se_lowrho.rds')  #change according to output file name from SimStudy
+simdata_out <- readRDS('hsgp and exact gp sim results/hsgp_simout_se.rds')  #change according to output file name from SimStudy
 simdata_out$d <- as.factor(simdata_out$d)
 simdata_out$m <- as.factor(simdata_out$m)
 simdata_out$n <- as.factor(simdata_out$n)
@@ -38,31 +38,31 @@ convsummary$bess_name <- 'Bulk-ESS'
 convsummary$tess_name <- 'Tail-ESS'
 # Rhat plot
 x_rhat_summary_plot <- ggplot(convsummary, aes(x = d, y = mrhat, colour = model_name)) + 
-  theme_bw(base_size = 25, base_family = 'Times') + 
+  theme_bw(base_size = 30, base_family = 'Times') + 
   geom_boxplot(linewidth = 1) +
   facet_wrap(~rhat_name) +
   labs(x = 'Output dimensions', y = 'Values', colour = 'Models') + 
   theme(axis.ticks = element_line(linewidth = 3)) +
-  scale_colour_manual(labels = c('Exact', 'HSGP'), values = c("#E69F00", "#009E73")) +
-  ggtitle('(a) Latent x')
+  scale_colour_manual(labels = c('Exact GP', 'HSGP'), values = c("#E69F00", "#009E73")) +
+  ggtitle('(a)')
 # Bulk-ESS plot
 x_ess_bulk_summary_plot <- ggplot(convsummary, aes(x = d, y = mbess, colour = model_name)) + 
-  theme_bw(base_size = 25, base_family = 'Times') +
+  theme_bw(base_size = 30, base_family = 'Times') +
   geom_boxplot(linewidth = 1) +
   facet_wrap(~bess_name) +
   scale_y_log10() +
   labs(x = 'Output dimensions', y = 'Values', colour = 'Models') + 
   theme(axis.ticks = element_line(linewidth = 3)) +
-  scale_colour_manual(labels = c('Exact', 'HSGP'), values = c("#E69F00", "#009E73"))
+  scale_colour_manual(labels = c('Exact GP', 'HSGP'), values = c("#E69F00", "#009E73"))
 # Tail-ESS plot
 x_ess_tail_summary_plot <- ggplot(convsummary, aes(x = d, y = mtess, colour = model_name)) + 
-  theme_bw(base_size = 25, base_family = 'Times') +
+  theme_bw(base_size = 30, base_family = 'Times') +
   geom_boxplot(linewidth = 1) +
   facet_wrap(~tess_name) +
   scale_y_log10() +
   labs(x = 'Output dimensions', y = 'Values', colour = 'Models') + 
   theme(axis.ticks = element_line(linewidth = 3)) +
-  scale_colour_manual(labels = c('Exact', 'HSGP'), values = c("#E69F00", "#009E73"))
+  scale_colour_manual(labels = c('Exact GP', 'HSGP'), values = c("#E69F00", "#009E73"))
 # combine diags for latent x
 p_latentx <- x_rhat_summary_plot + x_ess_bulk_summary_plot + x_ess_tail_summary_plot + 
   plot_layout(axis_titles = 'collect', guides = 'collect') & theme(axis.title = element_blank())
@@ -84,31 +84,31 @@ convsummary$bess_name <- 'Bulk-ESS'
 convsummary$tess_name <- 'Tail-ESS'
 # Rhat plot
 pars_rhat_summary_plot <- ggplot(convsummary, aes(x = d, y = mrhat, colour = model_name)) + 
-  theme_bw(base_size = 25, base_family = 'Times') + 
+  theme_bw(base_size = 30, base_family = 'Times') + 
   geom_boxplot(linewidth = 1) +
   facet_wrap(~rhat_name) +
   labs(x = 'Output dimensions', y = 'Values', colour = 'Models') + 
   theme(axis.ticks = element_line(linewidth = 3)) +
-  scale_colour_manual(labels = c('Exact', 'HSGP'), values = c("#E69F00", "#009E73")) +
-  ggtitle('(a) Hyperparameters')
+  scale_colour_manual(labels = c('Exact GP', 'HSGP'), values = c("#E69F00", "#009E73")) +
+  ggtitle('(b)')
 # Bulk-ESS plot
 pars_ess_bulk_summary_plot <- ggplot(convsummary, aes(x = d, y = mbess, colour = model_name)) + 
-  theme_bw(base_size = 25, base_family = 'Times') +
+  theme_bw(base_size = 30, base_family = 'Times') +
   geom_boxplot(linewidth = 1) +
   facet_wrap(~bess_name) +
   scale_y_log10() +
   labs(x = 'Output dimensions', y = 'Values', colour = 'Models') + 
   theme(axis.ticks = element_line(linewidth = 3)) +
-  scale_colour_manual(labels = c('Exact', 'HSGP'), values = c("#E69F00", "#009E73"))
+  scale_colour_manual(labels = c('Exact GP', 'HSGP'), values = c("#E69F00", "#009E73"))
 # Tail-ESS plot
 pars_ess_tail_summary_plot <- ggplot(convsummary, aes(x = d, y = mtess, colour = model_name)) + 
-  theme_bw(base_size = 25, base_family = 'Times') +
+  theme_bw(base_size = 30, base_family = 'Times') +
   geom_boxplot(linewidth = 1) +
   facet_wrap(~tess_name) +
   scale_y_log10() +
   labs(x = 'Output dimensions', y = 'Values', colour = 'Models') + 
   theme(axis.ticks = element_line(linewidth = 3)) +
-  scale_colour_manual(labels = c('Exact', 'HSGP'), values = c("#E69F00", "#009E73"))
+  scale_colour_manual(labels = c('Exact GP', 'HSGP'), values = c("#E69F00", "#009E73"))
 # Combine diags for hyperparameters
 p_hyperpars <- pars_rhat_summary_plot + pars_ess_bulk_summary_plot + pars_ess_tail_summary_plot + 
   plot_layout(axis_titles = 'collect', guides = 'collect')
@@ -116,9 +116,10 @@ p_hyperpars <- pars_rhat_summary_plot + pars_ess_bulk_summary_plot + pars_ess_ta
 # Combine all figures
 p_convdiag <- p_latentx / p_hyperpars + plot_layout(axis_titles = 'collect', guides = 'collect') & 
   theme(axis.title.y = element_blank())
-ggsave('se_per_lowrho_hsgp_valid.pdf',
+ggsave('se_hsgp_valid.pdf',
        p_convdiag,
        dpi = 300,
        width = 40,
        height = 20,
        units = 'cm')
+
