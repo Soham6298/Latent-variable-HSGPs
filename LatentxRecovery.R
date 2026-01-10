@@ -254,9 +254,9 @@ p_sd_eff200 <- ggplot(df_sd_eff200, aes(x = effect1__, y = estimate__)) +
 
 # Combine the plots
 p_latentx_eff <- ((p_bias_eff20 + p_sd_eff20) / 
-                      (p_bias_eff50 + p_sd_eff50) / 
-                      (p_bias_eff200 + p_sd_eff200)) + 
-                       plot_layout(axis_titles = 'collect')
+                    (p_bias_eff50 + p_sd_eff50) / 
+                    (p_bias_eff200 + p_sd_eff200)) + 
+  plot_layout(axis_titles = 'collect')
 
 ggsave('se_latentx.pdf',
        p_latentx_eff,
@@ -264,4 +264,3 @@ ggsave('se_latentx.pdf',
        width = 60,
        height = 45,
        units = 'cm')
-
