@@ -18,14 +18,14 @@ unlink(tempdir(), recursive = TRUE)
 tempdir(check = TRUE)
 
 # Specify data generating conditions
-N <- 20 #c(20, 50, 200)
-dims <- c(3, 5) #c(5, 10, 20)
+N <- c(20, 50, 200, 1000)
+dims <- c(5, 10, 20)
 s_x <- 0.3
 true_x_min <- 0
 true_x_max <- 10
 marginal_sd_params <- c(3, 0.25)
-error_sd_params <- c(1, 0.05)
-ls_params <- c(1, 0.25)
+error_sd_params <- c(1, 0.25)
+ls_params <- c(1, 0.05)
 intc_params <- c(0, 10)
 delta <- 1e-12
 covfn <- 'se'
@@ -72,9 +72,9 @@ x_min_model <- 0
 x_max_model <- 10
 rho_prior_model <- 0 # 0 = normal; 1 = invgamma;
 # Specify priors for the hyperparameters (check if they differ from the simulation setting)
-marginal_sd_params_model <- c(3, 0.25) # alpha ~ N( , )
-error_sd_params_model <- c(1, 0.25)    # sigma ~ N( , )
-ls_params_model <- c(1, 0.05) # rho ~ N( , ) or InvGamma( , )
+marginal_sd_params_model <- c(3, 0.25) # c(3.5, 1) # alpha ~ N( , )
+error_sd_params_model <- c(1, 0.25)    # c(1.5, 1) # sigma ~ N( , )
+ls_params_model <- c(1, 0.05) # c(1.5, 0.5) # rho ~ N( , ) or InvGamma( , )
 intc_params_model <- c(0, 10)
 covfn_model <- 0  # 0 = SE; 1 = Matern3/2; 2 = Matern 5/2
 # Set covariance function based scaler for HSGPs
@@ -107,86 +107,85 @@ for (i in 1:length(dims)) {
   sigma_names[[i]] <- sprintf('sigma[%s]', seq(1:dims[i]))
 }
 # parallel for exact GP
-#out_gp <- list()
-#out_gp1 <- list()
-#cores = 50
-#cl <- parallel::makeCluster(cores, type="PSOCK")
-#doParallel::registerDoParallel(cl)
-# model fit list
-# model_fit_exact = foreach(i = 1:n_sim) %dopar% {
-#   library(rstan)
-#   library(posterior)
-#   library(data.table)
-#   out_gp1[[i]] <- list()
-#   for (j in 1:length(dims)) {
-#     y <- simdata[[i]][[1]][[j]][,1:dims[j]]
-#     x_obs <- simdata[[i]][[1]][[j]]$x_obs
-#     x_true <- simdata[[i]][[1]][[j]]$x_true
-#     gp_fit <- gp_model(gpmodel = gpmodel, 
-#                        n_obs = N[1], 
-#                        dims = dims[j], 
-#                        outputs = y,
-#                        inputs = x_obs, 
-#                        latent_sd = s_x, 
-#                        latent_inputs = 1, 
-#                        covfn = covfn_model, 
-#                        is_vary = 1, 
-#                        is_corr = 0, 
-#                        rho_prior = rho_prior_model, 
-#                        ls_param = ls_params_model, 
-#                        x_min = x_min_model, 
-#                        x_max = x_max_model,
-#                        msd_param = marginal_sd_params_model, 
-#                        esd_param = error_sd_params_model, 
-#                        mean_intc = intc_params_model[1], 
-#                        sd_intc = intc_params_model[2], 
-#                        iter = 2000, 
-#                        warmup = 1000, 
-#                        chains = 1, 
-#                        cores = 1, 
-#                        init = 0, 
-#                        adapt_delta = adapt_delta_model)
-#     out_gp_x <- compare_summary(model = gp_fit, 
-#                                 variable = x_names[[1]], 
-#                                 true_variable = simdata[[i]][[1]][[j]]$x_true, 
-#                                 n_obs = N[1], 
-#                                 m_approx = 'exact', 
-#                                 dims = dims[j], 
-#                                 variable_class = 'x', 
-#                                 model_name = 'gp', 
-#                                 sim_id = i)
-#     out_gp_rho <- compare_summary(model = gp_fit, 
-#                                   variable = rho_names[[j]],
-#                                   true_variable = params[[i]][[1]][[j]]$rho, 
-#                                   n_obs = N[1], 
-#                                   m_approx = 'exact',
-#                                   dims = dims[j], 
-#                                   variable_class = 'rho', 
-#                                   model_name = 'gp', 
-#                                   sim_id = i)
-#     out_gp_alpha <- compare_summary(model = gp_fit, 
-#                                     variable = alpha_names[[j]],
-#                                     true_variable = params[[i]][[1]][[j]]$alpha,
-#                                     n_obs = N[1], 
-#                                     m_approx = 'exact',
-#                                     dims = dims[j], 
-#                                     variable_class = 'alpha', 
-#                                     model_name = 'gp',
-#                                     sim_id = i)
-#     out_gp_sigma <- compare_summary(model = gp_fit, 
-#                                     variable = sigma_names[[j]],
-#                                     true_variable = params[[i]][[1]][[j]]$sigma,
-#                                     n_obs = N[1],
-#                                     m_approx = 'exact',
-#                                     dims = dims[j], 
-#                                     variable_class = 'sigma', 
-#                                     model_name = 'gp',
-#                                     sim_id = i)
-#     out_gp1[[i]][[j]] <- rbind(out_gp_x, out_gp_rho, out_gp_alpha, out_gp_sigma)
-#   }
-#   out_gp[[i]] <- rbindlist(out_gp1[[i]])
-# }
-# compare_exact <- rbindlist(model_fit_exact)
+out_gp <- list()
+out_gp1 <- list()
+cores = 50
+cl <- parallel::makeCluster(cores, type="PSOCK")
+doParallel::registerDoParallel(cl)
+model_fit_exact = foreach(i = 1:n_sim) %dopar% {
+  library(rstan)
+  library(posterior)
+  library(data.table)
+  out_gp1[[i]] <- list()
+  for (j in 1:length(dims)) {
+    y <- simdata[[i]][[1]][[j]][,1:dims[j]]
+    x_obs <- simdata[[i]][[1]][[j]]$x_obs
+    x_true <- simdata[[i]][[1]][[j]]$x_true
+    gp_fit <- gp_model(gpmodel = gpmodel,
+                       n_obs = N[1],
+                       dims = dims[j],
+                       outputs = y,
+                       inputs = x_obs,
+                       latent_sd = s_x,
+                       latent_inputs = 1,
+                       covfn = covfn_model,
+                       is_vary = 1,
+                       is_corr = 0,
+                       rho_prior = rho_prior_model,
+                       ls_param = ls_params_model,
+                       x_min = x_min_model,
+                       x_max = x_max_model,
+                       msd_param = marginal_sd_params_model,
+                       esd_param = error_sd_params_model,
+                       mean_intc = intc_params_model[1],
+                       sd_intc = intc_params_model[2],
+                       iter = 2000,
+                       warmup = 1000,
+                       chains = 1,
+                       cores = 1,
+                       init = 0,
+                       adapt_delta = adapt_delta_model)
+    out_gp_x <- compare_summary(model = gp_fit,
+                                variable = x_names[[1]],
+                                true_variable = simdata[[i]][[1]][[j]]$x_true,
+                                n_obs = N[1],
+                                m_approx = 'exact',
+                                dims = dims[j],
+                                variable_class = 'x',
+                                model_name = 'gp',
+                                sim_id = i)
+    out_gp_rho <- compare_summary(model = gp_fit,
+                                  variable = rho_names[[j]],
+                                  true_variable = params[[i]][[1]][[j]]$rho,
+                                  n_obs = N[1],
+                                  m_approx = 'exact',
+                                  dims = dims[j],
+                                  variable_class = 'rho',
+                                  model_name = 'gp',
+                                  sim_id = i)
+    out_gp_alpha <- compare_summary(model = gp_fit,
+                                    variable = alpha_names[[j]],
+                                    true_variable = params[[i]][[1]][[j]]$alpha,
+                                    n_obs = N[1],
+                                    m_approx = 'exact',
+                                    dims = dims[j],
+                                    variable_class = 'alpha',
+                                    model_name = 'gp',
+                                    sim_id = i)
+    out_gp_sigma <- compare_summary(model = gp_fit,
+                                    variable = sigma_names[[j]],
+                                    true_variable = params[[i]][[1]][[j]]$sigma,
+                                    n_obs = N[1],
+                                    m_approx = 'exact',
+                                    dims = dims[j],
+                                    variable_class = 'sigma',
+                                    model_name = 'gp',
+                                    sim_id = i)
+    out_gp1[[i]][[j]] <- rbind(out_gp_x, out_gp_rho, out_gp_alpha, out_gp_sigma)
+  }
+  out_gp[[i]] <- rbindlist(out_gp1[[i]])
+}
+compare_exact <- rbindlist(model_fit_exact)
 
 # parallel for HSGP
 out_hsgp <- list()
