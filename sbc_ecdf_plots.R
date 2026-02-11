@@ -16,7 +16,7 @@ library(data.table)
 source('hsgpfitfns.R')
 
 # VIGP model output
-gplvmpyout <- read.csv('vigp sim results/GPLVMpyOut_m52.csv')
+gplvmpyout <- read.csv('vigp sim results/GPLVMpyOut_se.csv')
 summary(gplvmpyout)
 colnames(gplvmpyout) <- c('n', 'd', 'sim_id','sample_id', 'true_values', 'mean', 'sd')
 gplvmpyout$d <- as.factor(gplvmpyout$d)
@@ -89,7 +89,7 @@ list_combine <- list(x_names)
 names(list_combine)[1] <- plot_label # Properly named list
 # Plot for exact GP
 exact_ecdf <- plot_ecdf_diff(testrank, max_rank=1000, combine_variables = list_combine) +
-  theme_bw(base_size = 25, base_family = 'Times') + 
+  theme_bw(base_size = 15, base_family = 'Times') + labs(x = 'Normalized Rank Statistic', y = 'ECDF Difference') +
   scale_linewidth(range = 6)
 
 # ECDF for HSGPs
@@ -115,7 +115,7 @@ list_combine <- list(x_names)
 names(list_combine)[1] <- plot_label# Properly named list
 # Plot for HSGPs
 hsgp_ecdf <- plot_ecdf_diff(testrank, max_rank=1000, combine_variables = list_combine) +
-  theme_bw(base_size = 25, base_family = 'Times') + 
+  theme_bw(base_size = 15, base_family = 'Times') + labs(x = 'Normalized Rank Statistic', y = 'ECDF Difference') +
   scale_linewidth(range = 6)
 
 # ECDF for VIGPs
@@ -141,7 +141,7 @@ list_combine <- list(x_names)
 names(list_combine)[1] <- plot_label# Properly named list
 # Plot for VIGPs
 pyro_ecdf <- plot_ecdf_diff(testrank, max_rank=1000, combine_variables = list_combine) +
-  theme_bw(base_size = 25, base_family = 'Times') + 
+  theme_bw(base_size = 15, base_family = 'Times') + labs(x = 'Normalized Rank Statistic', y = 'ECDF Difference') +
   scale_linewidth(range = 6)
 
 # Combine ECDF plots from all models
@@ -151,6 +151,6 @@ ecdf_plots <- exact_ecdf + hsgp_ecdf + pyro_ecdf + plot_layout(axes = 'collect',
 ggsave('se_ecdf_n20_d20_sbc.pdf',
        ecdf_plots,
        dpi = 300,
-       width = 30,
-       height = 12,
+       width = 25,
+       height = 10,
        units = 'cm')

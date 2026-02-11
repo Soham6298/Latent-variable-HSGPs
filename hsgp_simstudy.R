@@ -72,9 +72,9 @@ x_min_model <- 0
 x_max_model <- 10
 rho_prior_model <- 0 # 0 = normal; 1 = invgamma;
 # Specify priors for the hyperparameters (check if they differ from the simulation setting)
-marginal_sd_params_model <- c(3, 0.25) # c(3.5, 1) # alpha ~ N( , )
-error_sd_params_model <- c(1, 0.25)    # c(1.5, 1) # sigma ~ N( , )
-ls_params_model <- c(1, 0.05) # c(1.5, 0.5) # rho ~ N( , ) or InvGamma( , )
+marginal_sd_params_model <- c(3.5, 1) # c(3, 0.25) # alpha ~ N( , )
+error_sd_params_model <- c(1.5, 1)    # c(1, 0.25) # sigma ~ N( , )
+ls_params_model <- c(1.5, 0.5) # c(1, 0.05) # rho ~ N( , ) or InvGamma( , )
 intc_params_model <- c(0, 10)
 covfn_model <- 0  # 0 = SE; 1 = Matern3/2; 2 = Matern 5/2
 # Set covariance function based scaler for HSGPs
