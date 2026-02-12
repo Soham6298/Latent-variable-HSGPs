@@ -10,10 +10,6 @@ library(brms)
 library(parallel)
 library(foreach)
 library(doParallel)
-#library(lemon)
-#library(grid)
-#library(gtable)
-#library(SBC)
 library(data.table)
 # Import functions
 source('hsgpfitfns.R')
@@ -81,6 +77,7 @@ pyro_out_fixpar <- pyro_out_fixpar[order(pyro_out_fixpar$sim_id),]
 
 # Import results from exact and HSGPs
 compare_table <- readRDS('hsgp and exact gp sim results/hsgp_simout_se_n1000_wideprior.rds')
+summary(compare_table$runtime)
 compare_table$sim_id <- as.factor(compare_table$sim_id)
 compare_table$n <- as.factor(compare_table$n)
 compare_table$m <- as.factor(compare_table$m)
@@ -108,30 +105,14 @@ levels(compare_x$m)
 compare_x$m <- factor(compare_x$m, levels = c('15', '19', '23', 'pyroVI', 'pyroVI_fix'))#c('exact', '22', '26', '30', 'pyroVI'))
 
 # Fit summary models
-# formula_bias <- bf(abs_bias ~ (1 + m) * d + (1 + m | data_id) + s(true_value, by = m),
-#                    sigma ~ (1 + m) * d + (1 + m | data_id) + s(true_value, by = m))
-# 
-# formula_sd <- bf(sd ~ (1 + m) * d + (1 + m | data_id) + s(true_value, by = m),
-#                  sigma ~ (1 + m) * d + (1 + m | data_id) + s(true_value, by = m))
-formula_bias <- bf(abs_bias ~ (1 + m))
+formula_bias <- bf(abs_bias ~ (1 + m) * d + (1 + m | data_id) + s(true_value, by = m),
+                   sigma ~ (1 + m) * d + (1 + m | data_id) + s(true_value, by = m))
 
-formula_sd <- bf(sd ~ (1 + m))
+formula_sd <- bf(sd ~ (1 + m) * d + (1 + m | data_id) + s(true_value, by = m),
+                 sigma ~ (1 + m) * d + (1 + m | data_id) + s(true_value, by = m))
 
-formula_list <- list(formula_bias, formula_sd)
-summary_fit <- list()
-summary_fit_list <- list()
-cores = 4 #50
-cl <- parallel::makeCluster(cores, type="PSOCK")
-doParallel::registerDoParallel(cl)
-# model fit list
-summary_fit = foreach(i = 1:2) %dopar% {
-library(brms)
-summary_fit_list[[i]] <- brm(formula_list[[i]], data = compare_x, chains = 1, cores = 1, file_refit = 'on_change')
-return(summary_fit_list)
-}
-
-#m_x_1000_bias <- brm(formula_bias,data = compare_x, chains = 2, cores = 2, file_refit = 'on_change')
-#m_x_1000_sd <- brm(formula_sd,data = compare_x, chains = 2, cores = 2, file_refit = 'on_change')
+m_x_1000_bias <- brm(formula_bias,data = compare_x, chains = 2, cores = 2, file_refit = 'on_change')
+m_x_1000_sd <- brm(formula_sd,data = compare_x, chains = 2, cores = 2, file_refit = 'on_change')
 
 #saveRDS(m_x_1000_bias, "hsgp_bias_summ_se_n1000_wideprior.rds")
 #saveRDS(m_x_1000_sd, "hsgp_sd_summ_se_n1000_wideprior.rds")
@@ -191,7 +172,7 @@ p_sd_eff1000 <- ggplot(df_sd_eff1000, aes(x = effect1__, y = estimate__)) +
 # Combine the plots
 p_latentx_eff <- (p_bias_eff1000 + p_sd_eff1000) + plot_layout(axis_titles = 'collect')
 
-ggsave('se_latentx_n1000_wideprior.pdf',
+ggsave('se_latentx.pdf',
        p_latentx_eff,
        dpi = 300,
        width = 80,

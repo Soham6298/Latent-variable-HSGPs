@@ -1,4 +1,4 @@
-## We perform model evaluation for HSGPs based on latent input estimation from simulation studies with N = 1000
+## We perform model convergence comparison for HSGPs and exact GPs for primary parameters of interest
 ## Need to load the output dataframe from the simulation study code before generating figures here
 
 library(dplyr)

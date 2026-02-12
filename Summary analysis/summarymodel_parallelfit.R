@@ -1,5 +1,5 @@
-## We perform model evaluation for HSGPs based on latent input estimation from simulation studies with N = 1000
-## Need to load the output dataframe from the simulation study code before generating figures here
+## We perform model evaluation for HSGPs based on latent input estimation from simulation studies with N = 1000 using cluster
+## Need to load the output dataframes from the simulation study code before generating figures here
 
 library(dplyr)
 #library(tidyverse)
@@ -131,71 +131,70 @@ summary_fit = foreach(i = 1:2) %dopar% {
 }
 
 saveRDS(summary_fit, 'summary_fit_list.rds')
-# #m_x_1000_bias <- brm(formula_bias,data = compare_x, chains = 2, cores = 2, file_refit = 'on_change')
-# #m_x_1000_sd <- brm(formula_sd,data = compare_x, chains = 2, cores = 2, file_refit = 'on_change')
-# 
-# #saveRDS(m_x_1000_bias, "hsgp_bias_summ_se_n1000_wideprior.rds")
-# #saveRDS(m_x_1000_sd, "hsgp_sd_summ_se_n1000_wideprior.rds")
-# ## Extract summary results as conditional eff data
-# cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-# 
-# m_bias_eff1000 <- conditional_effects(m_x_1000_bias, effects = 'm', 
-#                                       conditions = make_conditions(m_x_1000_bias, 'd'),
-#                                       resolution = 300)
-# m_sd_eff1000 <- conditional_effects(m_x_1000_sd, effects = 'm', 
-#                                     conditions = make_conditions(m_x_1000_sd, 'd'),
-#                                     resolution = 300)
-# 
-# # Prepare plots
-# label_outdims <- c('D = 5','D = 10','D = 20')
-# # Check and change labels according to the number of basis functions for HSGPs
-# label_models <- c('HSGP(15)','HSGP(19)','HSGP(23)','VIGP', 'VIGP(fixed)')
-# 
-# df_bias_eff1000 <- as.data.frame(m_bias_eff1000$`m`)
-# levels(df_bias_eff1000$cond__) <- label_outdims
-# levels(df_bias_eff1000$effect1__) <- label_models
-# p_bias_eff1000 <- ggplot(df_bias_eff1000, aes(x = effect1__, y = estimate__)) +
-#   theme_bw(base_size=35,
-#            base_family = 'Times') +
-#   geom_point(size = 3.5 ,
-#              position = position_dodge(width = 0.7)) +
-#   geom_errorbar(aes(ymin = lower__, ymax = upper__),
-#                 width = 0.5,
-#                 linewidth = 1.0,
-#                 position = position_dodge(width = 0.7)) +
-#   facet_wrap(~cond__) +
-#   labs(x = 'Models', y = 'Bias') +
-#   guides(fill = 'none') + 
-#   theme(axis.ticks = element_line(linewidth = 3), 
-#         axis.text.x = element_text(angle = 35, vjust = 0.7, hjust = 0.6)) +
-#   scale_colour_manual(values = c("#000000" )) + ggtitle('N = 1000')
-# 
-# df_sd_eff1000 <- as.data.frame(m_sd_eff1000$`m`)
-# levels(df_sd_eff1000$cond__) <- label_outdims
-# levels(df_sd_eff1000$effect1__) <- label_models
-# p_sd_eff1000 <- ggplot(df_sd_eff1000, aes(x = effect1__, y = estimate__)) +
-#   theme_bw(base_size=35,
-#            base_family = 'Times') +
-#   geom_point(size = 3.5 ,
-#              position = position_dodge(width = 0.7)) +
-#   geom_errorbar(aes(ymin = lower__, ymax = upper__),
-#                 width = 0.5,
-#                 linewidth = 1.0,
-#                 position = position_dodge(width = 0.7)) +
-#   facet_wrap(~cond__) +
-#   labs(x = 'Models', y = 'SD') +
-#   guides(fill = 'none') +
-#   theme(axis.ticks = element_line(linewidth = 3),
-#         axis.text.x = element_text(angle = 35, vjust = 0.7, hjust = 0.6)) +
-#   scale_colour_manual(values = c("#000000"))
-# 
-# # Combine the plots
-# p_latentx_eff <- (p_bias_eff1000 + p_sd_eff1000) + plot_layout(axis_titles = 'collect')
-# 
-# ggsave('se_latentx_n1000_wideprior.pdf',
-#        p_latentx_eff,
-#        dpi = 300,
-#        width = 80,
-#        height = 20,
-#        units = 'cm')
+m_x_1000_bias <- summary_fit[[1]][[1]]
+m_x_1000_sd <- summary_fit[[2]][[2]]
+
+
+## Extract summary results as conditional eff data
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+m_bias_eff1000 <- conditional_effects(m_x_1000_bias, effects = 'm',
+                                      conditions = make_conditions(m_x_1000_bias, 'd'),
+                                      resolution = 300)
+m_sd_eff1000 <- conditional_effects(m_x_1000_sd, effects = 'm',
+                                    conditions = make_conditions(m_x_1000_sd, 'd'),
+                                    resolution = 300)
+
+# Prepare plots
+label_outdims <- c('D = 5','D = 10','D = 20')
+# Check and change labels according to the number of basis functions for HSGPs
+label_models <- c('HSGP(15)','HSGP(19)','HSGP(23)','VIGP', 'VIGP(fixed)')
+
+df_bias_eff1000 <- as.data.frame(m_bias_eff1000$`m`)
+levels(df_bias_eff1000$cond__) <- label_outdims
+levels(df_bias_eff1000$effect1__) <- label_models
+p_bias_eff1000 <- ggplot(df_bias_eff1000, aes(x = effect1__, y = estimate__)) +
+  theme_bw(base_size=35,
+           base_family = 'Times') +
+  geom_point(size = 3.5 ,
+             position = position_dodge(width = 0.7)) +
+  geom_errorbar(aes(ymin = lower__, ymax = upper__),
+                width = 0.5,
+                linewidth = 1.0,
+                position = position_dodge(width = 0.7)) +
+  facet_wrap(~cond__) +
+  labs(x = 'Models', y = 'Bias') +
+  guides(fill = 'none') +
+  theme(axis.ticks = element_line(linewidth = 3),
+        axis.text.x = element_text(angle = 35, vjust = 0.7, hjust = 0.6)) +
+  scale_colour_manual(values = c("#000000" )) + ggtitle('N = 1000')
+
+df_sd_eff1000 <- as.data.frame(m_sd_eff1000$`m`)
+levels(df_sd_eff1000$cond__) <- label_outdims
+levels(df_sd_eff1000$effect1__) <- label_models
+p_sd_eff1000 <- ggplot(df_sd_eff1000, aes(x = effect1__, y = estimate__)) +
+  theme_bw(base_size=35,
+           base_family = 'Times') +
+  geom_point(size = 3.5 ,
+             position = position_dodge(width = 0.7)) +
+  geom_errorbar(aes(ymin = lower__, ymax = upper__),
+                width = 0.5,
+                linewidth = 1.0,
+                position = position_dodge(width = 0.7)) +
+  facet_wrap(~cond__) +
+  labs(x = 'Models', y = 'SD') +
+  guides(fill = 'none') +
+  theme(axis.ticks = element_line(linewidth = 3),
+        axis.text.x = element_text(angle = 35, vjust = 0.7, hjust = 0.6)) +
+  scale_colour_manual(values = c("#000000"))
+
+# Combine the plots
+p_latentx_eff <- (p_bias_eff1000 + p_sd_eff1000) + plot_layout(axis_titles = 'collect')
+
+ggsave('se_latentx_n1000_wideprior.pdf',
+       p_latentx_eff,
+       dpi = 300,
+       width = 80,
+       height = 20,
+       units = 'cm')
 
