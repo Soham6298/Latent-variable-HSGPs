@@ -10,8 +10,8 @@ library(data.table)
 # Import functions
 source('hsgpfitfns.R')
 # Compile stan models
-hsgpmodel <- stan_model('hsgp_maternclass.stan')
-#gpmodel <- stan_model('gp_maternclass.stan')
+hsgpmodel <- stan_model('Stan models/hsgp_maternclass.stan')
+gpmodel <- stan_model('Stan models/gp_maternclass.stan')
 # Set temporary folder (only to prevent cluster memory overflow)
 Sys.setenv(TMPDIR = "/mnt/volume")
 unlink(tempdir(), recursive = TRUE)
@@ -72,6 +72,7 @@ x_min_model <- 0
 x_max_model <- 10
 rho_prior_model <- 0 # 0 = normal; 1 = invgamma;
 # Specify priors for the hyperparameters (check if they differ from the simulation setting)
+# Model priors must be same as true data sampling distributions for SBC check in post-analysis
 marginal_sd_params_model <- c(3.5, 1) # c(3, 0.25) # alpha ~ N( , )
 error_sd_params_model <- c(1.5, 1)    # c(1, 0.25) # sigma ~ N( , )
 ls_params_model <- c(1.5, 0.5) # c(1, 0.05) # rho ~ N( , ) or InvGamma( , )
